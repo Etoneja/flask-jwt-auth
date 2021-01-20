@@ -15,6 +15,7 @@ class TestDevelopmentConfig(TestCase):
         return app
 
     def test_app_is_development(self):
+        self.assertFalse(app.config["SECRET_KEY"] is "secret_key")
         self.assertTrue(app.config['DEBUG'] is True)
         self.assertFalse(current_app is None)
         self.assertTrue(
@@ -30,6 +31,7 @@ class TestTestingConfig(TestCase):
         return app
 
     def test_app_is_testing(self):
+        self.assertFalse(app.config["SECRET_KEY"] is "secret_key")
         self.assertTrue(app.config['DEBUG'])
         self.assertTrue(
             app.config["SQLALCHEMY_DATABASE_URI"]

@@ -1,6 +1,8 @@
 # project/server/models.py
 
-import datetime
+from datetime import datetime, timedelta
+
+import jwt
 
 from project.server import app, db, bcrypt
 
@@ -20,5 +22,40 @@ class User(db.Model):
         self.password = bcrypt.generate_password_hash(
             password, app.config.get("BCRYPT_LOG_ROUNDS")
         ).decode()
-        self.registered_on = datetime.datetime.now()
+        self.registered_on = datetime.now()
         self.admin = admin
+
+    @staticmethod
+    def encode_auth_token(user_id):
+        """
+        Generates the Auth token
+        :return: string
+        """
+        try:
+            payload = {
+                "exp": datetime.utcnow() + timedelta(days=0, seconds=5),
+                "iat": datetime.utcnow(),
+                "sub": user_id
+            }
+            auth_token = jwt.encode(
+                payload,
+                app.config.get("SECRET_KEY"),
+                "HS256"
+            )
+            return auth_token
+        except Exception as e:
+            return e
+
+    @staticmethod
+    def decode_auth_token(auth_token):
+        try:
+            payload = jwt.decode(
+                auth_token,
+                app.config.get("SECRET_KEY"),
+                "HS256"
+            )
+            return payload["sub"]
+        except jwt.ExpiredSignatureError:
+            return "Signature expired. Please log in again."
+        except jwt.InvalidTokenError:
+            return "Invalid token. Please log in again."
