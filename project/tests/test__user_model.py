@@ -18,6 +18,15 @@ class TestUserModel(BaseTestCase):
         db.session.commit()
         auth_token = user.encode_auth_token(user.id)
         self.assertTrue(isinstance(auth_token, str))
+
+    def test_decode_auth_token(self):
+        user = User(
+            email="test@test.com",
+            password="test"
+        )
+        db.session.add(user)
+        db.session.commit()
+        auth_token = user.encode_auth_token(user.id)
         self.assertTrue(user.decode_auth_token(auth_token) == 1)
 
 
